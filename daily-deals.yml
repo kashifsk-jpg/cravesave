@@ -1,0 +1,28 @@
+name: CraveSave Daily Deals
+
+# Abu Dhabi is UTC+4. Your windows 11:15 & 17:30 AST = 07:15 & 13:30 UTC.
+on:
+  schedule:
+    - cron: "15 7 * * *"    # 11:15 Abu Dhabi
+    - cron: "30 13 * * *"   # 17:30 Abu Dhabi
+  workflow_dispatch:         # lets you trigger manually from the GitHub app
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install deps
+        run: pip install requests qrcode pillow
+
+      - name: Post deals to Telegram
+        env:
+          AMZN_TAG:     ${{ secrets.AMZN_TAG }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHANNEL:   ${{ secrets.TG_CHANNEL }}
+        run: python3 batch_post.py --post
