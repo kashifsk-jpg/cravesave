@@ -1,0 +1,24 @@
+name: CraveSave Daily Deals
+
+on:
+  schedule:
+    - cron: "15 7 * * *"    # 11:15 Abu Dhabi
+    - cron: "30 13 * * *"   # 17:30 Abu Dhabi
+  workflow_dispatch:
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install deps
+        run: pip install requests qrcode pillow
+      - name: Post deals to Telegram
+        env:
+          AMZN_TAG:     ${{ secrets.AMZN_TAG }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_CHANNEL:   ${{ secrets.TG_CHANNEL }}
+        run: python3 batch_post.py --post
