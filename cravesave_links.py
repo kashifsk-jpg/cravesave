@@ -17,7 +17,7 @@ import re
 import urllib.parse
 
 # ─── THE ONLY THING YOU MUST SET ─────────────────────────────────────────
-AFFILIATE_TAG = os.environ.get("AMZN_TAG", "YOURTAG-21")   # <-- paste your real tag
+AFFILIATE_TAG = os.environ.get("AMZN_TAG", "YOURTAG-21").strip().strip('"').strip("'")
 MARKETPLACE   = "www.amazon.ae"                            # UAE storefront
 ANDROID_PKG   = "com.amazon.mShop.android.shopping"        # Amazon app package
 # ─────────────────────────────────────────────────────────────────────────
@@ -47,11 +47,20 @@ def extract_asin(url_or_asin: str) -> str | None:
 
 
 def resolve_short_link(url: str) -> str:
-    """Follow an amzn.to / shortened link to its real URL (needs internet)."""
+    """Follow a shortened link (amzn.to, link.amazon, a.co, etc.) to its
+    real product URL. Needs internet. Tries HEAD, falls back to GET."""
     try:
         import requests
-        r = requests.head(url, allow_redirects=True, timeout=8,
-                          headers={"User-Agent": "Mozilla/5.0"})
+        headers = {"User-Agent": "Mozilla/5.0"}
+        try:
+            r = requests.head(url, allow_redirects=True, timeout=10, headers=headers)
+            if extract_asin(r.url):           # HEAD gave us a usable URL
+                return r.url
+        except Exception:
+            pass
+        # Some short hosts don't redirect on HEAD — try GET (stream, no full body)
+        r = requests.get(url, allow_redirects=True, timeout=10,
+                         headers=headers, stream=True)
         return r.url
     except Exception:
         return url
@@ -60,12 +69,18 @@ def resolve_short_link(url: str) -> str:
 def build_links(url_or_asin: str) -> dict:
     """Return every link variant you'd ever need for one product."""
     raw = url_or_asin.strip()
-    if "amzn.to" in raw or "/short" in raw:           # expand short links first
-        raw = resolve_short_link(raw)
 
+    # Try to read the ASIN directly (works for full amazon.ae URLs + bare ASINs,
+    # with no network call). If that fails, treat it as a short link and follow
+    # the redirect to wherever it lands, then read the ASIN from there.
     asin = extract_asin(raw)
     if not asin:
-        raise ValueError(f"Could not find an ASIN in: {url_or_asin}")
+        expanded = resolve_short_link(raw)
+        asin = extract_asin(expanded)
+    if not asin:
+        raise ValueError(
+            f"Could not find an ASIN in: {url_or_asin} "
+            f"(short link may not have resolved — check internet / the link)")
 
     tag = AFFILIATE_TAG
 
@@ -133,6 +148,60 @@ def telegram_caption(deal: dict, links: dict) -> str:
         "🔗 Affiliate link · we earn a small commission at no extra cost to you.",
     ]
     return "\n".join(lines)
+
+
+def facebook_post(deals_with_links: list, extras: dict) -> str:
+    """Build ONE consolidated Facebook post from ALL deals in the CSV.
+
+    deals_with_links: list of (deal_dict, links_dict) tuples.
+    extras: dict with optional keys -> noon_code, noon_link,
+            telegram, whatsapp  (set these in batch_post.py / env).
+    """
+    out = [
+        "🛒 Today's best deals in Abu Dhabi — all in one place 👇",
+        "",
+        "Tired of checking 5 apps? We hunt Amazon, Noon & more so you "
+        "don't have to. Here's what's actually worth grabbing right now 👇",
+        "",
+    ]
+
+    # Noon block (only if a code/link is configured)
+    if extras.get("noon_link"):
+        out.append("🟡 NOON — 10% OFF your order (up to AED 25 off)")
+        if extras.get("noon_code"):
+            out.append(f"Code: {extras['noon_code']}")
+        out.append(f"👉 {extras['noon_link']}")
+        out.append("")
+
+    # Amazon block
+    out.append("📦 AMAZON.AE — top picks today:")
+    for deal, links in deals_with_links:
+        price = deal.get("price", "")
+        old = f" (was AED {deal['old_price']})" if deal.get("old_price") else ""
+        price_txt = f" — AED {price}{old}" if price else ""
+        out.append(f"• {deal['title']}{price_txt}")
+        out.append(f"   👉 {links['web']}")
+    out.append("")
+
+    out += [
+        '💡 Tip: tap "Add to Cart" now even if you\'ll buy later this week — '
+        "your price stays locked.",
+        "",
+        "📲 Want these daily before they sell out? Join free:",
+    ]
+    if extras.get("telegram"):
+        out.append(f"Telegram 👉 {extras['telegram']}")
+    if extras.get("whatsapp"):
+        out.append(f"WhatsApp 👉 {extras['whatsapp']}")
+    out += [
+        "",
+        "Affiliate links — we earn a small commission at no extra cost to "
+        "you. It keeps CraveSave free 💛",
+        "",
+        "#AbuDhabi #UAEDeals #AbuDhabiDeals #AmazonUAE #NoonDeals "
+        "#UAEOffers #Dubai",
+    ]
+    return "\n".join(out)
 
 
 def whatsapp_caption(deal: dict, links: dict) -> str:
