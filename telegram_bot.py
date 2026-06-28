@@ -29,10 +29,18 @@ import requests
 
 from cravesave_links import build_links, make_qr, telegram_caption
 
-BOT_TOKEN  = os.environ["TG_BOT_TOKEN"]              # from @BotFather
-CHANNEL    = os.environ["TG_CHANNEL"]               # e.g. "@CraveSaveAD" or "-100123..."
-OWNER_ID   = int(os.environ.get("TG_OWNER_ID", "0")) # only this user can post
-SEND_QR    = os.environ.get("SEND_QR", "1") == "1"   # attach a QR image too
+def _env(name, default=""):
+    """Read an env var, stripping accidental quotes/spaces (common on Windows)."""
+    return os.environ.get(name, default).strip().strip('"').strip("'")
+
+BOT_TOKEN  = _env("TG_BOT_TOKEN")                    # from @BotFather
+CHANNEL    = _env("TG_CHANNEL")                      # e.g. @CraveSaveAD or -100123...
+OWNER_ID   = int(_env("TG_OWNER_ID", "0") or "0")    # only this user can post
+SEND_QR    = _env("SEND_QR", "1") == "1"             # attach a QR image too
+
+if not BOT_TOKEN or not CHANNEL:
+    raise SystemExit("Missing keys. Set TG_BOT_TOKEN and TG_CHANNEL "
+                     "(no quotes in the .bat file) and try again.")
 
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 

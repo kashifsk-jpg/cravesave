@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CraveSave Abu Dhabi — Today's Deals</title>
+<meta name="description" content="The best Amazon.ae & Noon deals in Abu Dhabi, hand-checked daily. Save without checking five apps.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a1f1c; --cream:#f6f1e3; --mute:#7a786e;
+    --save:#0a8754; --red:#d6402c; --noon:#f3d300;
+    --paper-line:#cfc9b6;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Space Mono',monospace;
+    background:linear-gradient(160deg,#073b2c,#02160f);
+    min-height:100vh; color:var(--ink);
+    display:flex; justify-content:center;
+    padding:28px 16px 60px;
+  }
+  .receipt{
+    background:var(--cream); width:100%; max-width:460px;
+    padding:46px 30px 38px; position:relative;
+    box-shadow:0 30px 60px rgba(0,0,0,.45);
+  }
+  /* perforated top & bottom edges */
+  .receipt::before,.receipt::after{
+    content:""; position:absolute; left:0; right:0; height:16px;
+    background:radial-gradient(circle at 8px -2px, transparent 8px, var(--cream) 9px) repeat-x;
+    background-size:16px 16px;
+  }
+  .receipt::before{top:-15px; transform:rotate(180deg)}
+  .receipt::after{bottom:-15px}
+
+  .eyebrow{font-weight:700; font-size:13px; letter-spacing:3px; color:var(--ink)}
+  h1{font-family:'Poppins',sans-serif; font-weight:800; font-size:46px;
+     line-height:.95; margin:6px 0 4px; letter-spacing:-1px}
+  .date{font-size:13px; color:var(--mute); letter-spacing:1px}
+
+  .rule{border:0; border-top:2px dashed var(--paper-line); margin:18px 0}
+
+  .item{display:block; text-decoration:none; color:inherit; position:relative;
+        padding:14px 0}
+  .item + .item{border-top:2px dashed var(--paper-line)}
+  .item .title{font-family:'Poppins',sans-serif; font-weight:500; font-size:18px;
+        padding-right:72px; line-height:1.2}
+  .prices{margin-top:8px; font-size:16px}
+  .was{color:var(--mute); text-decoration:line-through; text-decoration-color:var(--red)}
+  .now{color:var(--save); font-weight:700; margin-left:6px}
+  .badge{position:absolute; top:14px; right:0;
+        font-family:'Poppins',sans-serif; font-weight:700; font-size:18px;
+        background:var(--red); color:var(--cream); padding:5px 12px; border-radius:8px}
+  .perk{display:inline-block; margin-top:6px; font-size:12px; font-weight:700;
+        color:var(--ink); background:#e9e2cb; padding:3px 8px; border-radius:6px}
+  .grab{margin-top:10px; font-size:13px; font-weight:700; color:var(--ink);
+        letter-spacing:1px}
+  .item:hover .grab{color:var(--save)}
+
+  .total{margin:6px 0 4px}
+  .total .lbl{font-weight:700; font-size:15px; letter-spacing:1px}
+  .total .amt{font-family:'Poppins',sans-serif; font-weight:800; font-size:54px;
+        color:var(--save); line-height:1}
+
+  .noon{background:var(--noon); border-radius:10px; padding:14px 16px;
+        display:flex; align-items:center; justify-content:space-between; gap:10px;
+        margin:18px 0}
+  .noon .lbl{font-family:'Poppins',sans-serif; font-weight:700; font-size:18px}
+  .code-btn{font-family:'Space Mono',monospace; font-weight:700; font-size:16px;
+        background:var(--ink); color:var(--noon); border:0; padding:9px 14px;
+        border-radius:8px; cursor:pointer}
+  .code-btn:active{transform:scale(.97)}
+
+  .shop-noon{display:block; text-align:center; text-decoration:none;
+        background:var(--ink); color:var(--cream); font-family:'Poppins',sans-serif;
+        font-weight:700; padding:13px; border-radius:8px; margin-bottom:20px;
+        letter-spacing:1px}
+
+  footer{font-size:12px; color:var(--mute); line-height:1.6}
+  footer .handle{font-family:'Poppins',sans-serif; font-weight:700;
+        font-size:15px; color:var(--ink); display:block; margin-bottom:4px}
+  .tip{font-size:12.5px; color:var(--ink); background:#e9e2cb; padding:8px 10px;
+        border-radius:6px; margin:14px 0}
+
+  .toast{position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(20px);
+        background:var(--ink); color:var(--cream); padding:11px 18px; border-radius:30px;
+        font-size:14px; opacity:0; transition:.3s; pointer-events:none}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+  <main class="receipt">
+    <p class="eyebrow">CRAVESAVE &nbsp;·&nbsp; ABU DHABI</p>
+    <h1>Today's Deals</h1>
+    <p class="date">SAT 28 JUN 2026 &nbsp;—&nbsp; AMAZON.AE &amp; NOON</p>
+
+    <hr class="rule">
+
+    <a class="item" href="https://link.amazon/B00JWM5Wp" target="_blank" rel="nofollow sponsored noopener">
+      <div class="title">Samsung Galaxy S25 Ultra (AI Phone)</div>
+      <div class="prices"><span class="was">AED 5,099</span><span class="now">AED 2,799</span></div>
+      <div class="badge">-45%</div>
+      <div class="grab">GRAB DEAL →</div>
+    </a>
+
+    <a class="item" href="https://link.amazon/B01yCeOlC" target="_blank" rel="nofollow sponsored noopener">
+      <div class="title">PS5 Console (New)</div>
+      <div class="prices"><span class="was">AED 2,300</span><span class="now">AED 1,850</span></div>
+      <span class="perk">+ AED 250 OFF with ADCB card</span>
+      <div class="badge">-20%</div>
+      <div class="grab">GRAB DEAL →</div>
+    </a>
+
+    <a class="item" href="https://link.amazon/B04QokDCH" target="_blank" rel="nofollow sponsored noopener">
+      <div class="title">WHOOP 5.0 — 12-Month Membership Tracker</div>
+      <div class="prices"><span class="was">AED 1,379</span><span class="now">AED 1,049</span></div>
+      <div class="badge">-24%</div>
+      <div class="grab">GRAB DEAL →</div>
+    </a>
+
+    <a class="item" href="https://www.amazon.ae/dp/B09G9FPHY6?tag=YOURTAG" target="_blank" rel="nofollow sponsored noopener">
+      <div class="title">Echo Dot (5th Gen)</div>
+      <div class="prices"><span class="was">AED 229</span><span class="now">AED 149</span></div>
+      <div class="badge">-35%</div>
+      <div class="grab">GRAB DEAL →</div>
+    </a>
+
+    <a class="item" href="https://link.amazon/B06lNtVpD" target="_blank" rel="nofollow sponsored noopener">
+      <div class="title">WaterWipes Sensitive+ — 720 Wipes (12 packs)</div>
+      <div class="prices"><span class="was">AED 220</span><span class="now">AED 180</span></div>
+      <div class="badge">-18%</div>
+      <div class="grab">GRAB DEAL →</div>
+    </a>
+
+    <hr class="rule">
+
+    <div class="total">
+      <div class="lbl">YOU SAVE UP TO</div>
+      <div class="amt">AED 3,200</div>
+    </div>
+
+    <div class="noon">
+      <span class="lbl">NOON +10% OFF</span>
+      <button class="code-btn" onclick="copyCode()">ZOQJN ⧉</button>
+    </div>
+    <a class="shop-noon" href="https://s.noon.com/AUpJ2MynLlQ" target="_blank" rel="nofollow sponsored noopener">SHOP NOON →</a>
+
+    <div class="tip">💡 Tap <b>Add to Cart</b> now — your price stays locked even if you buy later this week.</div>
+
+    <footer>
+      <span class="handle">@cravesave.ad</span>
+      Affiliate links — we may earn a small commission at no extra cost to you. It keeps CraveSave free.
+      As an Amazon Associate I earn from qualifying purchases.
+    </footer>
+  </main>
+
+  <div class="toast" id="toast">Code ZOQJN copied ✓</div>
+
+<script>
+  function copyCode(){
+    navigator.clipboard.writeText('ZOQJN').then(()=>{
+      const t=document.getElementById('toast');
+      t.classList.add('show');
+      setTimeout(()=>t.classList.remove('show'),1800);
+    });
+  }
+</script>
+</body>
+</html>

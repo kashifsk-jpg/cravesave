@@ -23,11 +23,22 @@ import time
 import requests
 
 from cravesave_links import (build_links, make_qr,
-                             telegram_caption, whatsapp_caption)
+                             telegram_caption, whatsapp_caption,
+                             facebook_post)
 
 BOT_TOKEN = os.environ.get("TG_BOT_TOKEN", "")
 CHANNEL   = os.environ.get("TG_CHANNEL", "")
 API = f"https://api.telegram.org/bot{BOT_TOKEN}"
+
+# ─── For the consolidated Facebook post ──────────────────────────────────
+# Edit these once (your live Noon deal + where people can follow you).
+FB_EXTRAS = {
+    "noon_code": "ZOQJN",
+    "noon_link": "https://s.noon.com/AUpJ2MynLlQ",
+    "telegram":  os.environ.get("FB_TELEGRAM", "https://t.me/YourChannel"),
+    "whatsapp":  os.environ.get("FB_WHATSAPP", "https://chat.whatsapp.com/YourInvite"),
+}
+# ─────────────────────────────────────────────────────────────────────────
 
 CARD_TEMPLATE = """  <div class="deal-card">
     <span class="deal-app">Amazon.ae</span>
@@ -50,11 +61,12 @@ def main():
     do_post = "--post" in sys.argv
     os.makedirs("qr", exist_ok=True)
 
-    wa_blocks, html_cards = [], []
+    wa_blocks, html_cards, fb_deals = [], [], []
 
     with open("deals.csv", newline="", encoding="utf-8") as fh:
         rows = list(csv.DictReader(fh))
 
+    skipped = 0
     for row in rows:
         if not row.get("link"):
             continue
@@ -64,11 +76,19 @@ def main():
         if not deal["title"]:
             deal["title"] = "Amazon Deal"
 
-        links = build_links(deal["link"])
+        try:
+            links = build_links(deal["link"])
+        except ValueError as e:
+            skipped += 1
+            print(f"  SKIPPED bad row ({deal['title']}): {e}")
+            continue
         qr_path = make_qr(links["web"], f"qr/{links['asin']}.png")
 
         # WhatsApp block
         wa_blocks.append(whatsapp_caption(deal, links))
+
+        # Facebook (collected, combined into one post at the end)
+        fb_deals.append((deal, links))
 
         # Website card
         old = f'<s>AED {deal["old_price"]}</s>' if deal.get("old_price") else ""
@@ -89,9 +109,12 @@ def main():
         f.write("\n\n———————————————\n\n".join(wa_blocks))
     with open("website_cards.html", "w", encoding="utf-8") as f:
         f.write("\n".join(html_cards))
+    with open("facebook_post.txt", "w", encoding="utf-8") as f:
+        f.write(facebook_post(fb_deals, FB_EXTRAS))
 
     print(f"\nDone. {len(rows)} deals → whatsapp_captions.txt, "
-          f"website_cards.html, qr/*.png"
+          f"website_cards.html, facebook_post.txt, qr/*.png"
+          + (f"  ({skipped} bad row(s) skipped)" if skipped else "")
           + ("  (and posted to Telegram)" if do_post else ""))
 
 
